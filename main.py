@@ -23,15 +23,33 @@ DATA_SOURCES = {
     "customer_types": "customer_types.csv"
 }
 
-# LOGGING SETUP
+# LOGGING SETUP 
 
 def setup_logging():
-    """Configures the logging format and level."""
+    """
+    Configures logging to write to BOTH console and a timestamped file.
+    """
+    # Create a logs directory if it doesn't exist
+    log_dir = Path("logs")
+    log_dir.mkdir(exist_ok=True)
+
+    # Define the log filename
+    timestamp = time.strftime("%Y%m%d-%H%M%S")
+    log_filename = log_dir / f"etl_run_{timestamp}.log"
+
+    # Configure the logger
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s - %(levelname)s - %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
+        datefmt='%Y-%m-%d %H:%M:%S',
+        handlers=[
+            logging.FileHandler(log_filename),  # Write to disk
+            logging.StreamHandler(sys.stdout)   # Write to console
+        ]
     )
+    
+    logging.info(f"Logging initialized. Writing to: {log_filename}")
+
 
 # MAIN PIPELINE EXECUTION
 
@@ -42,14 +60,14 @@ def main():
     setup_logging()
     start_total = time.time()
 
+    logging.info("==========================================")
     logging.info("   STARTING FINANCE DATA PIPELINE (OBT)   ")
+    logging.info("==========================================")
 
     try:
         # EXTRACT (Lazy Loading)
-
-        logging.info(">>> EXTRACTING RAW DATA")
+        logging.info(">>> PHASE 1: EXTRACTING RAW DATA")
         
-        # Helper to get LazyFrame by key
         def get_source(key):
             return scan_dataset(DATA_SOURCES[key])
 
@@ -71,8 +89,7 @@ def main():
         logging.info(f"    Extraction plan created for {len(DATA_SOURCES)} sources.")
 
         # TRANSFORM (Polars Query Optimization)
-
-        logging.info(">>> TRANSFORMING & DENORMALIZING")
+        logging.info(">>> PHASE 2: TRANSFORMING & DENORMALIZING")
         
         etl_results = clean_and_enrich(
             txn_lf, loans_lf, accts_lf, cust_lf, addr_lf, branches_lf,
@@ -81,21 +98,21 @@ def main():
         
         logging.info("    Transformation logic applied. Ready to stream.")
 
+
         # LOAD (Streaming to Parquet)
 
         logging.info(">>> PHASE 3: LOADING TO ANALYTICS STORE")
 
-        # Save the "Wide Tables"
         save_to_parquet(etl_results['transactions'], "fact_transactions.parquet")
         save_to_parquet(etl_results['loans'], "fact_loans.parquet")
 
         # SUMMARY
-
+        
         duration = time.time() - start_total
-
+        logging.info("==========================================")
         logging.info(f"   PIPELINE SUCCESSFUL IN {duration:.2f} SECONDS")
         logging.info("   Outputs available in: data/processed/")
-
+        logging.info("==========================================")
 
     except FileNotFoundError as fnf_error:
         logging.error(f"CRITICAL: Missing file. {fnf_error}")
@@ -104,7 +121,6 @@ def main():
         
     except Exception as e:
         logging.error(f"CRITICAL: Pipeline failed. Reason: {e}")
-        # Print full traceback for debugging
         import traceback
         traceback.print_exc()
         sys.exit(1)

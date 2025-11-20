@@ -1,0 +1,31 @@
+2025-11-20 08:39:59 - INFO - Logging initialized. Writing to: logs/etl_run_20251120-083959.log
+2025-11-20 08:39:59 - INFO - ==========================================
+2025-11-20 08:39:59 - INFO -    STARTING FINANCE DATA PIPELINE (OBT)   
+2025-11-20 08:39:59 - INFO - ==========================================
+2025-11-20 08:39:59 - INFO - >>> PHASE 1: EXTRACTING RAW DATA
+2025-11-20 08:39:59 - INFO - Scanning source: transactions.csv
+2025-11-20 08:39:59 - INFO - Scanning source: loans.csv
+2025-11-20 08:39:59 - INFO - Scanning source: accounts.csv
+2025-11-20 08:39:59 - INFO - Scanning source: customers.csv
+2025-11-20 08:39:59 - INFO - Scanning source: addresses.csv
+2025-11-20 08:39:59 - INFO - Scanning source: branches.csv
+2025-11-20 08:39:59 - INFO - Scanning source: account_types.csv
+2025-11-20 08:39:59 - INFO - Scanning source: account_statuses.csv
+2025-11-20 08:39:59 - INFO - Scanning source: transaction_types.csv
+2025-11-20 08:39:59 - INFO - Scanning source: loan_statuses.csv
+2025-11-20 08:39:59 - INFO - Scanning source: customer_types.csv
+2025-11-20 08:39:59 - INFO -     Extraction plan created for 11 sources.
+2025-11-20 08:39:59 - INFO - >>> PHASE 2: TRANSFORMING & DENORMALIZING
+2025-11-20 08:39:59 - INFO - Starting transformation pipeline...
+2025-11-20 08:39:59 - INFO - Linking dimensions...
+2025-11-20 08:39:59 - INFO - Building Fact Tables...
+2025-11-20 08:39:59 - INFO -     Transformation logic applied. Ready to stream.
+2025-11-20 08:39:59 - INFO - >>> PHASE 3: LOADING TO ANALYTICS STORE
+2025-11-20 08:39:59 - INFO - Stream-loading data to data/processed/fact_transactions.parquet...
+2025-11-20 08:39:59 - INFO - SUCCESS: Saved fact_transactions.parquet | Size: 1.90 MB
+2025-11-20 08:39:59 - INFO - Stream-loading data to data/processed/fact_loans.parquet...
+2025-11-20 08:39:59 - INFO - SUCCESS: Saved fact_loans.parquet | Size: 0.03 MB
+2025-11-20 08:39:59 - INFO - ==========================================
+2025-11-20 08:39:59 - INFO -    PIPELINE SUCCESSFUL IN 0.11 SECONDS
+2025-11-20 08:39:59 - INFO -    Outputs available in: data/processed/
+2025-11-20 08:39:59 - INFO - ==========================================
