@@ -17,7 +17,7 @@ def _smart_date(col_name: str) -> pl.Expr:
     Returns a Polars Expression.
     """
     return pl.coalesce([
-        pl.col(col_name).str.to_datetime("%Y-%m-%d %H:%M:%S.%f", strict=False),
+        pl.col(col_name).str.to_datetime("%Y-%m-%d %H:%M:%S%.f", strict=False),
         pl.col(col_name).str.to_datetime("%Y-%m-%d %H:%M:%S", strict=False),
         pl.col(col_name).str.to_datetime("%d-%m-%Y %H:%M:%S", strict=False),
         pl.col(col_name).str.to_datetime("%Y-%m-%d", strict=False)
@@ -64,8 +64,8 @@ def clean_and_enrich(
     # Clean CUSTOMERS
     # Standardize names and Parse DOB using smart date logic
     clean_cust = _clean_cols(cust_lf).with_columns([
-        pl.col("firstname").str.strip_chars().fill_null("Unknown"),
-        pl.col("lastname").str.strip_chars().fill_null("Unknown"),
+        pl.col("firstname").str.to_titlecase().str.strip_chars().fill_null("Unknown"),
+        pl.col("lastname").str.to_titlecase().str.strip_chars().fill_null("Unknown"),
         _smart_date("dateofbirth").alias("dob")
     ]).with_columns([
         pl.concat_str([pl.col("firstname"), pl.col("lastname")], separator=" ").alias("full_name")
