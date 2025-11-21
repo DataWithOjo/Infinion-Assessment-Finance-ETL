@@ -33,7 +33,7 @@ In the fintech sector, timely and accurate data is the lifeblood of decision-mak
 
 ## Tech Stack & Tools
 
-* **Language:** Python 3.10+
+* **Language:** Python 3.10+, Bash Scripting
 * **Processing Engine:** Polars (Rust-based DataFrame library)
 * **Storage Format:** Parquet (Snappy Compression)
 * **Testing:** Pytest, Unittest.mock
