@@ -7,7 +7,7 @@ from main import main
 # ==========================================
 # HAPPY PATH: Full Pipeline Success
 # ==========================================
-@patch("main.validate_schema")  
+@patch("main.validate_schema")   
 @patch("main.save_to_parquet")
 @patch("main.clean_and_enrich")
 @patch("main.scan_dataset")
@@ -15,7 +15,7 @@ def test_main_success(mock_extract, mock_transform, mock_load, mock_validate, ca
     """
     Verifies that main() correctly orchestrates the ETL flow.
     """
-    # Capture INFO logs
+    # Capture INFO logs so we can see "PIPELINE SUCCESSFUL"
     caplog.set_level(logging.INFO)
 
     # ARRANGE
@@ -39,7 +39,16 @@ def test_main_success(mock_extract, mock_transform, mock_load, mock_validate, ca
     
     # Verify Loading (Transactions + Loans)
     assert mock_load.call_count == 2
-    mock_load.assert_any_call("clean_txn_lf", "fact_transactions.parquet")
+    
+    # --- Update expectations to match Partitioning logic ---
+    # Transaction load has partition_cols
+    mock_load.assert_any_call(
+        "clean_txn_lf", 
+        "fact_transactions", 
+        partition_cols=["txn_year", "txn_month"]
+    )
+    
+    # Loans load is standard
     mock_load.assert_any_call("clean_loan_lf", "fact_loans.parquet")
 
     # Verify Success Log
