@@ -16,7 +16,7 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    # Set up Python 3.10 (matching your Dockerfile)
+    # Set up Python 3.10 (matching Dockerfile)
     - name: Set up Python 3.10
       uses: actions/setup-python@v5
       with:
