@@ -41,7 +41,6 @@ In the fintech sector, timely and accurate data is the lifeblood of decision-mak
 * **Orchestration:** Cron (Local), scalable to Apache Airflow
 * **CI/CD:** GitHub Actions
 * **Cloud Integration (Simulated):** Microsoft Fabric (OneLake, Delta Lake), PySpark
-* **Orchestration (Simulated):** Local execution via `main.py` (Scalable to Airflow)
 
 ---
 
