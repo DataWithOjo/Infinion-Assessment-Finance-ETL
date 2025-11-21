@@ -4,19 +4,22 @@ from unittest.mock import patch
 import sys
 from main import main
 
+# ==========================================
 # HAPPY PATH: Full Pipeline Success
-
+# ==========================================
+@patch("main.validate_schema")  
 @patch("main.save_to_parquet")
 @patch("main.clean_and_enrich")
 @patch("main.scan_dataset")
-def test_main_success(mock_extract, mock_transform, mock_load, caplog):
+def test_main_success(mock_extract, mock_transform, mock_load, mock_validate, caplog):
     """
     Verifies that main() correctly orchestrates the ETL flow.
     """
-    # Capture INFO logs so we can see "PIPELINE SUCCESSFUL"
+    # Capture INFO logs
     caplog.set_level(logging.INFO)
 
     # ARRANGE
+    # We return a string, which is fine because we mocked validation & transform
     mock_extract.return_value = "dummy_lazyframe"
     
     mock_transform.return_value = {
@@ -28,23 +31,23 @@ def test_main_success(mock_extract, mock_transform, mock_load, caplog):
     main()
 
     # ASSERT
-    # Verify Extraction
+    # Verify Extraction (11 files)
     assert mock_extract.call_count == 11
     
     # Verify Transformation
     mock_transform.assert_called_once()
     
-    # Verify Loading 
+    # Verify Loading (Transactions + Loans)
     assert mock_load.call_count == 2
     mock_load.assert_any_call("clean_txn_lf", "fact_transactions.parquet")
     mock_load.assert_any_call("clean_loan_lf", "fact_loans.parquet")
 
-    # Verify Success Log 
+    # Verify Success Log
     assert "PIPELINE SUCCESSFUL" in caplog.text
 
-
+# ==========================================
 # ERROR PATH: Missing File
-
+# ==========================================
 @patch("main.scan_dataset")
 @patch("sys.exit")
 def test_main_missing_file_error(mock_exit, mock_extract, caplog):
@@ -58,8 +61,9 @@ def test_main_missing_file_error(mock_exit, mock_extract, caplog):
     assert "CRITICAL: Missing file" in caplog.text
     mock_exit.assert_called_once_with(1)
 
+# ==========================================
 # ERROR PATH: Generic Crash
-
+# ==========================================
 @patch("main.scan_dataset")
 @patch("sys.exit")
 def test_main_generic_crash(mock_exit, mock_extract, caplog):
