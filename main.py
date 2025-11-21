@@ -122,12 +122,22 @@ def main():
         logging.info("    Transformation logic applied. Ready to stream.")
 
         # ---------------------------------------------------------
-        # LOAD (Streaming to Parquet)
+        # LOAD (Partitioned & Streaming)
         # ---------------------------------------------------------
-        logging.info(">>> PHASE 3: LOADING TO ANALYTICS STORE")
+        logging.info(">>> LOADING TO ANALYTICS STORE")
 
-        save_to_parquet(etl_results['transactions'], "fact_transactions.parquet")
-        save_to_parquet(etl_results['loans'], "fact_loans.parquet")
+        # Load Transactions (Partitioned by Year/Month for speed)
+        save_to_parquet(
+            etl_results['transactions'], 
+            "fact_transactions", 
+            partition_cols=["txn_year", "txn_month"]
+        )
+        
+        # Load Loans
+        save_to_parquet(
+            etl_results['loans'], 
+            "fact_loans.parquet"
+        )
 
         # ---------------------------------------------------------
         # SUMMARY

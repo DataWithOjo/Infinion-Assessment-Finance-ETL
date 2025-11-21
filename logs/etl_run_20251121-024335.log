@@ -1,0 +1,32 @@
+2025-11-21 02:43:35 - INFO - Logging initialized. Writing to: logs/etl_run_20251121-024335.log
+2025-11-21 02:43:35 - INFO - ==========================================
+2025-11-21 02:43:35 - INFO -    STARTING FINANCE DATA PIPELINE (OBT)   
+2025-11-21 02:43:35 - INFO - ==========================================
+2025-11-21 02:43:35 - INFO - >>> PHASE 1: EXTRACTING RAW DATA
+2025-11-21 02:43:35 - INFO - Scanning source: transactions.csv
+2025-11-21 02:43:35 - INFO - Schema validation passed for 'Unknown'
+2025-11-21 02:43:35 - INFO - Scanning source: loans.csv
+2025-11-21 02:43:35 - INFO - Schema validation passed for 'Unknown'
+2025-11-21 02:43:35 - INFO - Scanning source: accounts.csv
+2025-11-21 02:43:35 - INFO - Scanning source: customers.csv
+2025-11-21 02:43:35 - INFO - Scanning source: addresses.csv
+2025-11-21 02:43:35 - INFO - Scanning source: branches.csv
+2025-11-21 02:43:35 - INFO - Scanning source: account_types.csv
+2025-11-21 02:43:35 - INFO - Scanning source: account_statuses.csv
+2025-11-21 02:43:35 - INFO - Scanning source: transaction_types.csv
+2025-11-21 02:43:35 - INFO - Scanning source: loan_statuses.csv
+2025-11-21 02:43:35 - INFO - Scanning source: customer_types.csv
+2025-11-21 02:43:35 - INFO -     Extraction and Validation successful for 11 sources.
+2025-11-21 02:43:35 - INFO - >>> PHASE 2: TRANSFORMING & DENORMALIZING
+2025-11-21 02:43:35 - INFO - Starting transformation pipeline...
+2025-11-21 02:43:35 - INFO -     Transformation logic applied. Ready to stream.
+2025-11-21 02:43:35 - INFO - >>> LOADING TO ANALYTICS STORE
+2025-11-21 02:43:35 - INFO - Starting load for fact_transactions...
+2025-11-21 02:43:35 - INFO - Writing partitioned dataset to data/processed/fact_transactions based on ['txn_year', 'txn_month']...
+2025-11-21 02:43:35 - INFO - SUCCESS: Partitioned data saved to data/processed/fact_transactions/
+2025-11-21 02:43:35 - INFO - Starting load for fact_loans.parquet...
+2025-11-21 02:43:35 - INFO - SUCCESS: Saved fact_loans.parquet | Size: 0.03 MB
+2025-11-21 02:43:35 - INFO - ==========================================
+2025-11-21 02:43:35 - INFO -    PIPELINE SUCCESSFUL IN 0.39 SECONDS
+2025-11-21 02:43:35 - INFO -    Outputs available in: data/processed/
+2025-11-21 02:43:35 - INFO - ==========================================

@@ -6,6 +6,17 @@ This project is a response to the Data Engineering technical assessment. It impl
 
 ![Pipeline Architecture](./docs/Finance-ETL2.png)
 
+### Data Architecture & Flow
+
+1.  **Ingest (Bronze Layer):** Raw CSV files are lazily scanned from the source directory. No data is loaded into RAM yet.
+2.  **Process (Silver Layer):**
+    * **Schema Validation:** Critical columns are checked for existence.
+    * **Cleaning:** Types are cast, strings are normalized, and invalid dates are filtered.
+    * **Enrichment:** Reference IDs (AccountTypeID, etc.) are joined to their respective lookups.
+3.  **Serve (Gold Layer):**
+    * **Denormalization:** Customer and Account dimensions are merged into the Transaction facts.
+    * **Load:** Final "Wide Tables" are streamed to disk as highly compressed Parquet files, ready for BI consumption.
+
 ---
 
 ## Business Impact & Value Proposition
@@ -17,6 +28,20 @@ In the fintech sector, timely and accurate data is the lifeblood of decision-mak
 - **Data Trust:** The implementation of Data Quality Gates (validate.py) ensures that bad data is rejected before it pollutes the analytics layer. This builds trust in the dashboards used by stakeholders.
 - **Scalability:** The architecture is designed to handle growth. Whether processing 50,000 rows today or 50 million tomorrow, the underlying logic remains robust without needing a rewrite.
 - **Direct Lake Readiness:** The output is structured for Microsoft Fabric's Direct Lake mode, eliminating the need for Power BI to import data. This enables real-time reporting on massive datasets without performance degradation.
+
+---
+
+## Tech Stack & Tools
+
+* **Language:** Python 3.10+
+* **Processing Engine:** [Polars](https://pola.rs/) (Rust-based DataFrame library)
+* **Storage Format:** Parquet (Snappy Compression)
+* **Testing:** Pytest, Unittest.mock
+* **Containerization:** Docker
+* **Orchestration:** Cron (Local), scalable to Apache Airflow
+* **CI/CD:** GitHub Actions
+* **Cloud Integration (Simulated):** Microsoft Fabric (OneLake, Delta Lake), PySpark
+* **Orchestration (Simulated):** Local execution via `main.py` (Scalable to Airflow)
 
 ---
 
@@ -65,6 +90,29 @@ The pipeline uses Polars’ Lazy API via `pl.scan_csv()`:
 - **Predicate Pushdown**
 - **Lower Memory Usage**
 - **Faster Processing**
+
+### 3. Storage Optimization: Partitioning
+
+I implemented **Hive-style Partitioning** for the Transaction Fact table.
+* **Strategy:** Partitioned by `Year` and `Month`.
+* **Result:** The output is structured as `fact_transactions/txn_year=2023/txn_month=10/...`.
+* **Benefit:** Analytical queries (e.g., "Show me October 2023 sales") can perform **Partition Pruning**, reading only the relevant sub-folders instead of scanning the entire dataset.
+
+## 4. Orchestration & Scheduling
+
+### **Current Implementation**
+
+For this local assessment, the pipeline includes a shell script (`scripts/setup_cron.sh`) that automatically registers a Cron Job to trigger the pipeline daily at **06:00 AM**.
+
+### **Production Strategy**
+
+In a scaled environment, I would wrap the `main.py` entry point in an **Apache Airflow** or **Dagster** DAG to support:
+
+- Backfilling  
+- Automatic retries  
+- Dependency management (e.g., waiting for S3 file arrival)  
+- Production-grade observability and alerting  
+
 
 ---
 
@@ -178,4 +226,38 @@ The pipeline is designed for effortless cloud deployment:
 ├── main.py                    # Pipeline Orchestrator
 ├── README.md                  # Documentation
 └── requirements.txt           # Dependency pinning
+```
+
+---
+
+## Analytics Capabilities (Sample Queries)
+
+The final `fact_transactions.parquet` is designed to answer complex business questions immediately.
+
+**Q1: What is the monthly transaction volume by Account Type?**
+*Business Value: Identify which account products drive the most activity.*
+
+```sql
+SELECT 
+    STRFTIME('%Y-%m', TransactionDate) as Month,
+    AccountType,
+    COUNT(*) as TotalTransactions,
+    SUM(Amount) as TotalVolume
+FROM 'data/processed/fact_transactions.parquet'
+GROUP BY 1, 2
+ORDER BY 1 DESC;
+```
+
+**Q2: Which customers have the highest loan default risk? Business Value: Risk management and targeted intervention.**
+
+```sql
+SELECT
+    l.full_name as CustomerName, 
+    l.loan_status,             
+    l.principalamount,
+    l.interestrate
+FROM 'data/processed/fact_loans.parquet' as l
+WHERE l.loan_status = 'Overdue'   
+ORDER BY l.principalamount DESC
+LIMIT 10;
 ```
