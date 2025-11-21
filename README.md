@@ -129,7 +129,7 @@ The Docker image is published to Docker Hub.
 #### 1. Pull the Image
 
 ```bash
-docker pull datawithojo/finance-etl:v1.1
+docker pull datawithojo/finance-etl:v1.2
 ```
 
 #### 2. Run the Container
@@ -138,7 +138,7 @@ docker pull datawithojo/finance-etl:v1.1
 docker run --rm \
   -v $(pwd)/data:/app/data \
   -v $(pwd)/logs:/app/logs \
- docker push datawithojo/finance-etl:v1.1
+ docker push datawithojo/finance-etl:v1.2
 ```
 
 ---
