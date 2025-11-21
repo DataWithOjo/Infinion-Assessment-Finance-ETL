@@ -8,12 +8,12 @@ This project is a response to the Data Engineering technical assessment. It impl
 
 ### Data Architecture & Flow
 
-1.  **Ingest (Bronze Layer):** Raw CSV files are lazily scanned from the source directory. No data is loaded into RAM yet.
-2.  **Process (Silver Layer):**
+1.  **Extract:** Raw CSV files are lazily scanned from the source directory. No data is loaded into RAM yet.
+2.  **Transform:**
     * **Schema Validation:** Critical columns are checked for existence.
     * **Cleaning:** Types are cast, strings are normalized, and invalid dates are filtered.
     * **Enrichment:** Reference IDs (AccountTypeID, etc.) are joined to their respective lookups.
-3.  **Serve (Gold Layer):**
+3.  **Load:**
     * **Denormalization:** Customer and Account dimensions are merged into the Transaction facts.
     * **Load:** Final "Wide Tables" are streamed to disk as highly compressed Parquet files, ready for BI consumption.
 
@@ -34,7 +34,7 @@ In the fintech sector, timely and accurate data is the lifeblood of decision-mak
 ## Tech Stack & Tools
 
 * **Language:** Python 3.10+
-* **Processing Engine:** [Polars](https://pola.rs/) (Rust-based DataFrame library)
+* **Processing Engine:** Polars (Rust-based DataFrame library)
 * **Storage Format:** Parquet (Snappy Compression)
 * **Testing:** Pytest, Unittest.mock
 * **Containerization:** Docker
